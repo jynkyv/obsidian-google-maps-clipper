@@ -204,6 +204,39 @@
   }
 
   /**
+   * Extract price range per person
+   */
+  function extractPriceRange() {
+    // Look for the price button with currency icon (jsname="tJHJj" or class containing price info)
+    const priceButtons = document.querySelectorAll('[jsname="tJHJj"], .MNVeJb');
+    for (const btn of priceButtons) {
+      const text = getText(btn);
+      // Match patterns like "每人 ¥1,000-2,000", "$10-20", "¥1000〜2000" etc.
+      const match = text.match(/(每人\s*[¥$€£₩]?[\d,.]+-?[\d,.]*|[¥$€£₩][\d,.]+-[\d,.]*|\$\$|\$\$\$)/i);
+      if (match) return match[0].trim();
+      // Also try to find price level indicators
+      const priceMatch = text.match(/([¥$€£₩][\s\d,.~〜–-]+[\d,.]*)/i);
+      if (priceMatch) {
+        // Check if there's a "每人" prefix nearby
+        const fullMatch = text.match(/(每人[^\n]*[¥$€£₩][\s\d,.~〜–-]+[\d,.]*)/i);
+        return fullMatch ? fullMatch[0].trim() : priceMatch[0].trim();
+      }
+    }
+
+    // Fallback: search aria-labels
+    const allBtns = document.querySelectorAll('button[aria-label], div[role="button"][aria-label]');
+    for (const btn of allBtns) {
+      const label = btn.getAttribute('aria-label') || '';
+      if (label.includes('¥') || label.includes('$') || label.includes('价') || label.includes('價')) {
+        const match = label.match(/(每人[^,]*|[¥$€£₩][\d,.~〜–-]+[\d,.]*)/i);
+        if (match) return match[0].trim();
+      }
+    }
+
+    return '';
+  }
+
+  /**
    * Extract opening hours
    */
   function extractHours() {
@@ -248,6 +281,9 @@
     // Hours
     const hours = extractHours();
 
+    // Price range
+    const priceRange = extractPriceRange();
+
     // Page URL
     const url = window.location.href;
 
@@ -263,6 +299,7 @@
       lat: coords ? coords.lat : null,
       lng: coords ? coords.lng : null,
       hours: hours,
+      priceRange: priceRange,
       photoUrl: photoUrl,
       googleMapsUrl: url,
       plusCode: buttonData.plusCode,

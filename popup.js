@@ -129,6 +129,7 @@
         setFieldValue('phone', data.phone);
         setFieldValue('website', data.website);
         setFieldValue('coordinates', data.coordinates);
+        setFieldValue('priceRange', data.priceRange);
         setFieldValue('googleMapsUrl', data.googleMapsUrl);
         setFieldValue('tags', defaultTags.join(', '));
         setFieldValue('created', formatDate(new Date()));
@@ -177,6 +178,7 @@
                 .replace(/\{\{coordinates\}\}/g, data.coordinates || '')
                 .replace(/\{\{googleMapsUrl\}\}/g, data.googleMapsUrl || '')
                 .replace(/\{\{hours\}\}/g, data.hours || '')
+                .replace(/\{\{priceRange\}\}/g, data.priceRange || '')
                 .replace(/\{\{#if (\w+)\}\}(.*?)\{\{\/if\}\}/gs, (match, field, content) => {
                     return data[field] ? content : '';
                 });
@@ -194,6 +196,7 @@
             if (data.reviewCount) content += ` (${data.reviewCount} 条评价)`;
             content += '\n';
         }
+        if (data.priceRange) content += `**人均消费**: ${data.priceRange}\n`;
         if (data.hours) content += `**营业时间**: ${data.hours}\n`;
         if (data.coordinates) content += `**坐标**: ${data.coordinates}\n`;
 
@@ -228,6 +231,7 @@
             phone: getFieldValue('phone'),
             website: getFieldValue('website'),
             coordinates: getFieldValue('coordinates'),
+            price_range: getFieldValue('priceRange'),
             google_maps_url: getFieldValue('googleMapsUrl'),
             tags: getFieldValue('tags'),
             created: getFieldValue('created')
