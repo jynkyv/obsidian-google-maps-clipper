@@ -4,53 +4,7 @@
 (function () {
     'use strict';
 
-    // Default template presets
-    const DEFAULT_TEMPLATES = [
-        {
-            id: 'default',
-            name: '默认',
-            icon: 'map-pin',
-            color: '#8b5cf6',
-            folder: 'Places',
-            tags: 'places',
-            properties: ['name', 'address', 'rating', 'phone', 'website', 'coordinates', 'priceRange', 'googleMapsUrl', 'tags', 'created'],
-            customProperties: [],
-            noteTemplate: ''
-        },
-        {
-            id: 'restaurant',
-            name: '餐厅',
-            icon: 'utensils',
-            color: '#f59e0b',
-            folder: 'Places/Restaurants',
-            tags: 'places, places/restaurant',
-            properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
-            customProperties: [],
-            noteTemplate: ''
-        },
-        {
-            id: 'cafe',
-            name: '咖啡店',
-            icon: 'coffee',
-            color: '#78716c',
-            folder: 'Places/Cafes',
-            tags: 'places, places/cafe',
-            properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
-            customProperties: [],
-            noteTemplate: ''
-        },
-        {
-            id: 'attraction',
-            name: '景点',
-            icon: 'landmark',
-            color: '#3b82f6',
-            folder: 'Places/Attractions',
-            tags: 'places, places/attraction',
-            properties: ['name', 'address', 'rating', 'category', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
-            customProperties: [],
-            noteTemplate: ''
-        }
-    ];
+    // Use DEFAULT_TEMPLATES from global templates.js
 
     // DOM Elements
     const templateList = document.getElementById('template-list');
@@ -470,6 +424,19 @@
         if (!settings.templates || settings.templates.length === 0) {
             settings.templates = DEFAULT_TEMPLATES;
             saveSettings({ templates: settings.templates });
+        } else {
+            // Merge any missing default templates that user hasn't seen yet
+            let changed = false;
+            const existingIds = new Set(settings.templates.map(t => t.id));
+            DEFAULT_TEMPLATES.forEach(dt => {
+                if (!existingIds.has(dt.id)) {
+                    settings.templates.push(dt);
+                    changed = true;
+                }
+            });
+            if (changed) {
+                saveSettings({ templates: settings.templates });
+            }
         }
 
         renderVaults();

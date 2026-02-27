@@ -51,17 +51,18 @@
             });
         }
 
-        // Load templates into selector
-        currentTemplates = settings.templates || [];
+        // Load templates into selector (use DEFAULT_TEMPLATES from templates.js as fallback)
+        currentTemplates = (settings.templates && settings.templates.length > 0) ? settings.templates : DEFAULT_TEMPLATES;
         templateSelect.innerHTML = '';
+        const activeId = settings.activeTemplateId || 'default';
         currentTemplates.forEach(tpl => {
             const opt = document.createElement('option');
             opt.value = tpl.id;
             opt.textContent = tpl.name;
-            if (tpl.id === (settings.activeTemplateId || 'default')) opt.selected = true;
+            if (tpl.id === activeId) opt.selected = true;
             templateSelect.appendChild(opt);
         });
-        currentTemplate = currentTemplates.find(t => t.id === (settings.activeTemplateId || 'default')) || currentTemplates[0];
+        currentTemplate = currentTemplates.find(t => t.id === activeId) || currentTemplates[0];
 
         // Apply template defaults
         if (currentTemplate) {

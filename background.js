@@ -51,24 +51,25 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 // Initialize default settings on install
 chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
+        // Load default templates
+        importScripts('templates.js');
         chrome.storage.sync.set({
             vaults: [],
             defaultVault: '',
             defaultFolder: 'Places',
             defaultTags: ['places'],
-            noteTemplate: `## {{name}}
-
-{{#if category}}**类型**: {{category}}{{/if}}
-{{#if address}}**地址**: {{address}}{{/if}}
-{{#if phone}}**电话**: {{phone}}{{/if}}
-{{#if website}}**网站**: [{{website}}]({{website}}){{/if}}
-{{#if rating}}**评分**: {{rating}}⭐ ({{reviewCount}} 条评价){{/if}}
-{{#if hours}}**营业时间**: {{hours}}{{/if}}
-{{#if coordinates}}**坐标**: {{coordinates}}{{/if}}
-
-[📍 Google Maps]({{googleMapsUrl}})
-`,
+            templates: DEFAULT_TEMPLATES,
+            activeTemplateId: 'default',
+            noteTemplate: '',
             createdAt: new Date().toISOString()
+        });
+    } else if (details.reason === 'update') {
+        // On update, ensure templates exist in storage
+        chrome.storage.sync.get({ templates: [] }, (result) => {
+            if (!result.templates || result.templates.length === 0) {
+                importScripts('templates.js');
+                chrome.storage.sync.set({ templates: DEFAULT_TEMPLATES, activeTemplateId: 'default' });
+            }
         });
     }
 });
