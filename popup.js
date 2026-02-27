@@ -37,7 +37,7 @@
 
         // Load settings
         const settings = await loadSettings();
-        pathNameField.value = settings.defaultFolder || 'Places';
+        pathNameField.value = settings.defaultFolder || 'Resources/Places';
 
         // Setup vaults
         if (settings.vaults && settings.vaults.length > 0) {
@@ -66,9 +66,9 @@
 
         // Apply template defaults
         if (currentTemplate) {
-            pathNameField.value = currentTemplate.folder || settings.defaultFolder || 'Places';
+            pathNameField.value = currentTemplate.folder || settings.defaultFolder || 'Resources/Places';
         } else {
-            pathNameField.value = settings.defaultFolder || 'Places';
+            pathNameField.value = settings.defaultFolder || 'Resources/Places';
         }
 
         // Load default tags from template or global
@@ -133,7 +133,7 @@
             chrome.storage.sync.get({
                 vaults: [],
                 defaultVault: '',
-                defaultFolder: 'Places',
+                defaultFolder: 'Resources/Places',
                 defaultTags: ['places'],
                 noteTemplate: '',
                 templates: [],

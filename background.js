@@ -56,7 +56,7 @@ chrome.runtime.onInstalled.addListener((details) => {
         chrome.storage.sync.set({
             vaults: [],
             defaultVault: '',
-            defaultFolder: 'Places',
+            defaultFolder: 'Resources/Places',
             defaultTags: ['places'],
             templates: DEFAULT_TEMPLATES,
             activeTemplateId: 'default',

@@ -48,7 +48,7 @@
             chrome.storage.sync.get({
                 vaults: [],
                 defaultVault: '',
-                defaultFolder: 'Places',
+                defaultFolder: 'Resources/Places',
                 defaultTags: ['places'],
                 templates: DEFAULT_TEMPLATES,
                 activeTemplateId: 'default'
@@ -226,7 +226,7 @@
             name: '新模板',
             icon: 'map-pin',
             color: '#8b5cf6',
-            folder: settings.defaultFolder || 'Places',
+            folder: settings.defaultFolder || 'Resources/Places',
             tags: (settings.defaultTags || []).join(', '),
             properties: ['name', 'address', 'rating', 'phone', 'website', 'coordinates', 'priceRange', 'googleMapsUrl', 'tags', 'created'],
             customProperties: [],
@@ -417,7 +417,7 @@
 
     async function init() {
         await loadSettings();
-        defaultFolderInput.value = settings.defaultFolder || 'Places';
+        defaultFolderInput.value = settings.defaultFolder || 'Resources/Places';
         defaultTagsInput.value = (settings.defaultTags || []).join(', ');
 
         // If no templates exist, create defaults
