@@ -25,8 +25,11 @@
     const placePreview = document.getElementById('place-preview');
     const previewPhoto = document.getElementById('preview-photo');
     const previewCategory = document.getElementById('preview-category');
+    const templateSelect = document.getElementById('template-select');
 
     let placeData = null;
+    let currentTemplates = [];
+    let currentTemplate = null;
 
     // Initialize
     async function init() {
@@ -48,8 +51,27 @@
             });
         }
 
-        // Load default tags
-        const defaultTags = settings.defaultTags || ['places'];
+        // Load templates into selector
+        currentTemplates = settings.templates || [];
+        templateSelect.innerHTML = '';
+        currentTemplates.forEach(tpl => {
+            const opt = document.createElement('option');
+            opt.value = tpl.id;
+            opt.textContent = tpl.name;
+            if (tpl.id === (settings.activeTemplateId || 'default')) opt.selected = true;
+            templateSelect.appendChild(opt);
+        });
+        currentTemplate = currentTemplates.find(t => t.id === (settings.activeTemplateId || 'default')) || currentTemplates[0];
+
+        // Apply template defaults
+        if (currentTemplate) {
+            pathNameField.value = currentTemplate.folder || settings.defaultFolder || 'Places';
+        } else {
+            pathNameField.value = settings.defaultFolder || 'Places';
+        }
+
+        // Load default tags from template or global
+        const defaultTags = currentTemplate?.tags ? currentTemplate.tags.split(',').map(t => t.trim()).filter(Boolean) : settings.defaultTags || ['places'];
 
         // Get current tab and extract data
         try {
@@ -112,7 +134,9 @@
                 defaultVault: '',
                 defaultFolder: 'Places',
                 defaultTags: ['places'],
-                noteTemplate: ''
+                noteTemplate: '',
+                templates: [],
+                activeTemplateId: 'default'
             }, resolve);
         });
     }
@@ -133,6 +157,12 @@
         setFieldValue('googleMapsUrl', data.googleMapsUrl);
         setFieldValue('tags', defaultTags.join(', '));
         setFieldValue('created', formatDate(new Date()));
+
+        // Set icon and color from template
+        if (currentTemplate) {
+            setFieldValue('icon', currentTemplate.icon || '');
+            setFieldValue('color', currentTemplate.color || '');
+        }
 
         // Preview photo
         if (data.photoUrl) {
@@ -225,6 +255,8 @@
      */
     function buildFullNote() {
         const props = {
+            icon: getFieldValue('icon'),
+            color: getFieldValue('color'),
             name: getFieldValue('name'),
             address: getFieldValue('address'),
             rating: getFieldValue('rating'),
@@ -389,6 +421,29 @@
     propertiesToggle.addEventListener('click', () => {
         const isCollapsed = metadataProperties.classList.toggle('collapsed');
         propertiesToggle.querySelector('.chevron').classList.toggle('rotated', isCollapsed);
+    });
+
+    // Template change handler
+    templateSelect.addEventListener('change', () => {
+        const selectedId = templateSelect.value;
+        currentTemplate = currentTemplates.find(t => t.id === selectedId) || currentTemplates[0];
+        if (currentTemplate) {
+            // Update folder
+            pathNameField.value = currentTemplate.folder || '';
+            // Update tags
+            const tags = currentTemplate.tags ? currentTemplate.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+            setFieldValue('tags', tags.join(', '));
+            // Update icon and color
+            setFieldValue('icon', currentTemplate.icon || '');
+            setFieldValue('color', currentTemplate.color || '');
+            // Regenerate content with template
+            if (placeData) {
+                noteContentField.value = generateNoteContent(placeData, currentTemplate.noteTemplate || '');
+                autoResizeTextarea(noteContentField);
+            }
+            // Save active template
+            chrome.storage.sync.set({ activeTemplateId: selectedId });
+        }
     });
 
     noteNameField.addEventListener('input', () => autoResizeTextarea(noteNameField));

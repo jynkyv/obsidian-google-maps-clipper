@@ -1,41 +1,115 @@
 // Obsidian Google Map Clipper — Settings Page Logic
+// Multi-template system with icon/color support
 
 (function () {
     'use strict';
 
+    // Default template presets
+    const DEFAULT_TEMPLATES = [
+        {
+            id: 'default',
+            name: '默认',
+            icon: 'map-pin',
+            color: '#8b5cf6',
+            folder: 'Places',
+            tags: 'places',
+            properties: ['name', 'address', 'rating', 'phone', 'website', 'coordinates', 'priceRange', 'googleMapsUrl', 'tags', 'created'],
+            customProperties: [],
+            noteTemplate: ''
+        },
+        {
+            id: 'restaurant',
+            name: '餐厅',
+            icon: 'utensils',
+            color: '#f59e0b',
+            folder: 'Places/Restaurants',
+            tags: 'places, places/restaurant',
+            properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
+            customProperties: [],
+            noteTemplate: ''
+        },
+        {
+            id: 'cafe',
+            name: '咖啡店',
+            icon: 'coffee',
+            color: '#78716c',
+            folder: 'Places/Cafes',
+            tags: 'places, places/cafe',
+            properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
+            customProperties: [],
+            noteTemplate: ''
+        },
+        {
+            id: 'attraction',
+            name: '景点',
+            icon: 'landmark',
+            color: '#3b82f6',
+            folder: 'Places/Attractions',
+            tags: 'places, places/attraction',
+            properties: ['name', 'address', 'rating', 'category', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
+            customProperties: [],
+            noteTemplate: ''
+        }
+    ];
+
     // DOM Elements
+    const templateList = document.getElementById('template-list');
+    const newTemplateBtn = document.getElementById('new-template-btn');
+    const generalSection = document.getElementById('general-section');
+    const templateSection = document.getElementById('template-section');
+    const templateSectionTitle = document.getElementById('template-section-title');
+    const sidebarItems = document.querySelectorAll('#sidebar li[data-section]');
+
+    // General settings elements
     const vaultInput = document.getElementById('vault-input');
     const vaultList = document.getElementById('vault-list');
     const defaultVaultSelect = document.getElementById('default-vault-select');
     const defaultFolderInput = document.getElementById('default-folder-input');
     const defaultTagsInput = document.getElementById('default-tags-input');
-    const tagsPreview = document.getElementById('tags-preview');
-    const noteTemplateTextarea = document.getElementById('note-template-textarea');
-    const resetTemplateBtn = document.getElementById('reset-template-btn');
     const exportSettingsBtn = document.getElementById('export-settings-btn');
     const importSettingsBtn = document.getElementById('import-settings-btn');
     const importFileInput = document.getElementById('import-file-input');
-    const saveStatus = document.getElementById('save-status');
+
+    // Template editor elements
+    const templateNameInput = document.getElementById('template-name');
+    const templateIconInput = document.getElementById('template-icon');
+    const templateColorInput = document.getElementById('template-color');
+    const templateColorPicker = document.getElementById('template-color-picker');
+    const templateFolderInput = document.getElementById('template-folder');
+    const templateTagsInput = document.getElementById('template-tags');
+    const templateContentTextarea = document.getElementById('template-content');
+    const propertiesChecklist = document.getElementById('properties-checklist');
+    const customPropertiesList = document.getElementById('custom-properties-list');
+    const addCustomPropBtn = document.getElementById('add-custom-prop-btn');
+    const duplicateTemplateBtn = document.getElementById('duplicate-template-btn');
+    const deleteTemplateBtn = document.getElementById('delete-template-btn');
 
     let settings = {};
+    let currentTemplateId = null;
 
-    // Load settings
-    async function loadSettings() {
+    // ==================== Settings Load/Save ====================
+
+    function loadSettings() {
         return new Promise((resolve) => {
             chrome.storage.sync.get({
                 vaults: [],
                 defaultVault: '',
                 defaultFolder: 'Places',
                 defaultTags: ['places'],
-                noteTemplate: ''
+                templates: DEFAULT_TEMPLATES,
+                activeTemplateId: 'default'
             }, (result) => {
                 settings = result;
+                // Ensure templates have all required fields
+                settings.templates = settings.templates.map(t => ({
+                    ...DEFAULT_TEMPLATES.find(d => d.id === t.id) || DEFAULT_TEMPLATES[0],
+                    ...t
+                }));
                 resolve(result);
             });
         });
     }
 
-    // Save settings
     function saveSettings(update) {
         Object.assign(settings, update);
         chrome.storage.sync.set(settings, () => {
@@ -44,75 +118,266 @@
     }
 
     function showSaveStatus() {
-        saveStatus.classList.add('visible');
+        // Brief visual feedback
+        const sidebar = document.getElementById('sidebar');
+        sidebar.style.borderRightColor = 'var(--accent)';
         setTimeout(() => {
-            saveStatus.classList.remove('visible');
-        }, 2000);
+            sidebar.style.borderRightColor = '';
+        }, 300);
     }
 
-    // Render vault list
+    // ==================== Sidebar Navigation ====================
+
+    function showSection(sectionId) {
+        // Hide all sections
+        document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+
+        // Deactivate all sidebar items
+        document.querySelectorAll('#sidebar li[data-section], #template-list li').forEach(li => li.classList.remove('active'));
+
+        if (sectionId === 'general') {
+            generalSection.classList.add('active');
+            document.querySelector('#sidebar li[data-section="general"]').classList.add('active');
+            currentTemplateId = null;
+        } else {
+            // Template section
+            templateSection.classList.add('active');
+            const templateItem = document.querySelector(`#template-list li[data-id="${sectionId}"]`);
+            if (templateItem) templateItem.classList.add('active');
+            currentTemplateId = sectionId;
+            loadTemplateEditor(sectionId);
+        }
+    }
+
+    // ==================== Template List ====================
+
+    function renderTemplateList() {
+        templateList.innerHTML = '';
+        (settings.templates || []).forEach((tpl) => {
+            const li = document.createElement('li');
+            li.setAttribute('data-id', tpl.id);
+            li.innerHTML = `
+        <span class="template-color-dot" style="background:${escapeHtml(tpl.color || '#8b5cf6')}"></span>
+        <span class="template-name">${escapeHtml(tpl.name)}</span>
+      `;
+            li.addEventListener('click', () => showSection(tpl.id));
+            if (tpl.id === currentTemplateId) li.classList.add('active');
+            templateList.appendChild(li);
+        });
+    }
+
+    // ==================== Template Editor ====================
+
+    function loadTemplateEditor(templateId) {
+        const tpl = settings.templates.find(t => t.id === templateId);
+        if (!tpl) return;
+
+        templateSectionTitle.textContent = '编辑模板 — ' + tpl.name;
+        templateNameInput.value = tpl.name || '';
+        templateIconInput.value = tpl.icon || '';
+        templateColorInput.value = tpl.color || '#8b5cf6';
+        templateColorPicker.value = tpl.color || '#8b5cf6';
+        templateFolderInput.value = tpl.folder || '';
+        templateTagsInput.value = tpl.tags || '';
+        templateContentTextarea.value = tpl.noteTemplate || '';
+
+        // Load properties checkboxes
+        const checkboxes = propertiesChecklist.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            const prop = cb.getAttribute('data-prop');
+            if (prop === 'name') {
+                cb.checked = true; // Always required
+            } else {
+                cb.checked = (tpl.properties || []).includes(prop);
+            }
+        });
+
+        // Load custom properties
+        renderCustomProperties(tpl.customProperties || []);
+    }
+
+    function saveCurrentTemplate() {
+        if (!currentTemplateId) return;
+        const tpl = settings.templates.find(t => t.id === currentTemplateId);
+        if (!tpl) return;
+
+        tpl.name = templateNameInput.value.trim() || 'Untitled';
+        tpl.icon = templateIconInput.value.trim();
+        tpl.color = templateColorInput.value.trim() || '#8b5cf6';
+        tpl.folder = templateFolderInput.value.trim();
+        tpl.tags = templateTagsInput.value.trim();
+        tpl.noteTemplate = templateContentTextarea.value;
+
+        // Save checked properties
+        const props = [];
+        propertiesChecklist.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+            props.push(cb.getAttribute('data-prop'));
+        });
+        tpl.properties = props;
+
+        // Save custom properties
+        const customProps = [];
+        customPropertiesList.querySelectorAll('.custom-prop-row').forEach(row => {
+            const key = row.querySelector('.custom-prop-key').value.trim();
+            const value = row.querySelector('.custom-prop-value').value.trim();
+            if (key) customProps.push({ key, defaultValue: value });
+        });
+        tpl.customProperties = customProps;
+
+        saveSettings({ templates: settings.templates });
+        renderTemplateList();
+        templateSectionTitle.textContent = '编辑模板 — ' + tpl.name;
+    }
+
+    // ==================== Custom Properties ====================
+
+    function renderCustomProperties(customProps) {
+        customPropertiesList.innerHTML = '';
+        (customProps || []).forEach((prop, index) => {
+            addCustomPropRow(prop.key, prop.defaultValue, index);
+        });
+    }
+
+    function addCustomPropRow(key, defaultValue, index) {
+        const row = document.createElement('div');
+        row.className = 'custom-prop-row';
+        row.innerHTML = `
+      <input type="text" class="custom-prop-key" placeholder="属性名" value="${escapeHtml(key || '')}">
+      <input type="text" class="custom-prop-value" placeholder="默认值" value="${escapeHtml(defaultValue || '')}">
+      <button type="button" class="btn-icon btn-danger remove-custom-prop" title="删除">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+        customPropertiesList.appendChild(row);
+
+        row.querySelector('.remove-custom-prop').addEventListener('click', () => {
+            row.remove();
+            saveCurrentTemplate();
+        });
+
+        row.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', debounce(saveCurrentTemplate, 500));
+        });
+    }
+
+    // ==================== Template CRUD ====================
+
+    function generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+    }
+
+    function createNewTemplate() {
+        const newTpl = {
+            id: generateId(),
+            name: '新模板',
+            icon: 'map-pin',
+            color: '#8b5cf6',
+            folder: settings.defaultFolder || 'Places',
+            tags: (settings.defaultTags || []).join(', '),
+            properties: ['name', 'address', 'rating', 'phone', 'website', 'coordinates', 'priceRange', 'googleMapsUrl', 'tags', 'created'],
+            customProperties: [],
+            noteTemplate: ''
+        };
+        settings.templates.push(newTpl);
+        saveSettings({ templates: settings.templates });
+        renderTemplateList();
+        showSection(newTpl.id);
+    }
+
+    function duplicateCurrentTemplate() {
+        if (!currentTemplateId) return;
+        const src = settings.templates.find(t => t.id === currentTemplateId);
+        if (!src) return;
+
+        const newTpl = { ...JSON.parse(JSON.stringify(src)), id: generateId(), name: src.name + ' (副本)' };
+        settings.templates.push(newTpl);
+        saveSettings({ templates: settings.templates });
+        renderTemplateList();
+        showSection(newTpl.id);
+    }
+
+    function deleteCurrentTemplate() {
+        if (!currentTemplateId) return;
+        if (settings.templates.length <= 1) {
+            alert('至少需要保留一个模板。');
+            return;
+        }
+        if (!confirm(`确定要删除模板 "${settings.templates.find(t => t.id === currentTemplateId)?.name}" 吗？`)) return;
+
+        settings.templates = settings.templates.filter(t => t.id !== currentTemplateId);
+        saveSettings({ templates: settings.templates });
+        renderTemplateList();
+        showSection('general');
+    }
+
+    // ==================== Vault Management ====================
+
     function renderVaults() {
         vaultList.innerHTML = '';
-        settings.vaults.forEach((vault, index) => {
+        (settings.vaults || []).forEach((vault, index) => {
             const li = document.createElement('li');
             li.innerHTML = `
         <span class="vault-name">${escapeHtml(vault)}</span>
-        <button class="remove-vault" data-index="${index}" title="Remove vault">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+        <button class="remove-vault" data-index="${index}" title="删除">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       `;
             vaultList.appendChild(li);
         });
 
         // Update vault select
-        const currentDefault = settings.defaultVault;
+        const current = settings.defaultVault;
         defaultVaultSelect.innerHTML = '<option value="">未设置</option>';
-        settings.vaults.forEach(vault => {
-            const option = document.createElement('option');
-            option.value = vault;
-            option.textContent = vault;
-            if (vault === currentDefault) option.selected = true;
-            defaultVaultSelect.appendChild(option);
+        (settings.vaults || []).forEach(vault => {
+            const opt = document.createElement('option');
+            opt.value = vault;
+            opt.textContent = vault;
+            if (vault === current) opt.selected = true;
+            defaultVaultSelect.appendChild(opt);
         });
     }
 
-    // Render tags preview
-    function renderTagsPreview() {
-        const tags = settings.defaultTags || [];
-        tagsPreview.innerHTML = '';
-        tags.forEach((tag, index) => {
-            const chip = document.createElement('span');
-            chip.className = 'tag-chip';
-            chip.innerHTML = `#${escapeHtml(tag)} <span class="remove-tag" data-index="${index}">×</span>`;
-            tagsPreview.appendChild(chip);
-        });
-    }
+    // ==================== Event Listeners ====================
 
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
+    // Sidebar navigation
+    sidebarItems.forEach(li => {
+        li.addEventListener('click', () => showSection(li.getAttribute('data-section')));
+    });
 
-    // Initialize
-    async function init() {
-        await loadSettings();
+    // New template
+    newTemplateBtn.addEventListener('click', createNewTemplate);
 
-        // Populate form
-        defaultFolderInput.value = settings.defaultFolder || 'Places';
-        defaultTagsInput.value = (settings.defaultTags || []).join(', ');
-        noteTemplateTextarea.value = settings.noteTemplate || '';
+    // Template editor auto-save
+    [templateNameInput, templateIconInput, templateColorInput, templateFolderInput, templateTagsInput].forEach(el => {
+        el.addEventListener('input', debounce(saveCurrentTemplate, 400));
+    });
+    templateContentTextarea.addEventListener('input', debounce(saveCurrentTemplate, 600));
 
-        renderVaults();
-        renderTagsPreview();
-    }
+    // Color picker sync
+    templateColorPicker.addEventListener('input', () => {
+        templateColorInput.value = templateColorPicker.value;
+        saveCurrentTemplate();
+    });
+    templateColorInput.addEventListener('input', debounce(() => {
+        if (/^#[0-9a-f]{6}$/i.test(templateColorInput.value)) {
+            templateColorPicker.value = templateColorInput.value;
+        }
+        saveCurrentTemplate();
+    }, 400));
 
-    // Event listeners
+    // Properties checkboxes
+    propertiesChecklist.addEventListener('change', () => saveCurrentTemplate());
 
-    // Add vault
+    // Custom properties
+    addCustomPropBtn.addEventListener('click', () => {
+        addCustomPropRow('', '', -1);
+    });
+
+    // Duplicate / Delete template
+    duplicateTemplateBtn.addEventListener('click', duplicateCurrentTemplate);
+    deleteTemplateBtn.addEventListener('click', deleteCurrentTemplate);
+
+    // Vault management
     vaultInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -126,12 +391,11 @@
         }
     });
 
-    // Remove vault
     vaultList.addEventListener('click', (e) => {
-        const removeBtn = e.target.closest('.remove-vault');
-        if (removeBtn) {
-            const index = parseInt(removeBtn.dataset.index, 10);
-            settings.vaults.splice(index, 1);
+        const btn = e.target.closest('.remove-vault');
+        if (btn) {
+            const idx = parseInt(btn.dataset.index, 10);
+            settings.vaults.splice(idx, 1);
             if (settings.defaultVault && !settings.vaults.includes(settings.defaultVault)) {
                 settings.defaultVault = '';
             }
@@ -140,53 +404,17 @@
         }
     });
 
-    // Default vault change
-    defaultVaultSelect.addEventListener('change', () => {
-        saveSettings({ defaultVault: defaultVaultSelect.value });
-    });
-
-    // Default folder change
-    defaultFolderInput.addEventListener('input', debounce(() => {
-        saveSettings({ defaultFolder: defaultFolderInput.value.trim() });
-    }, 500));
-
-    // Default tags change
+    defaultVaultSelect.addEventListener('change', () => saveSettings({ defaultVault: defaultVaultSelect.value }));
+    defaultFolderInput.addEventListener('input', debounce(() => saveSettings({ defaultFolder: defaultFolderInput.value.trim() }), 500));
     defaultTagsInput.addEventListener('input', debounce(() => {
         const tags = defaultTagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
-        settings.defaultTags = tags;
         saveSettings({ defaultTags: tags });
-        renderTagsPreview();
     }, 500));
 
-    // Remove tag from preview
-    tagsPreview.addEventListener('click', (e) => {
-        const removeTag = e.target.closest('.remove-tag');
-        if (removeTag) {
-            const index = parseInt(removeTag.dataset.index, 10);
-            settings.defaultTags.splice(index, 1);
-            defaultTagsInput.value = settings.defaultTags.join(', ');
-            saveSettings({ defaultTags: settings.defaultTags });
-            renderTagsPreview();
-        }
-    });
-
-    // Note template change
-    noteTemplateTextarea.addEventListener('input', debounce(() => {
-        saveSettings({ noteTemplate: noteTemplateTextarea.value });
-    }, 500));
-
-    // Reset template
-    resetTemplateBtn.addEventListener('click', () => {
-        if (confirm('确定要重置为默认模板吗？')) {
-            noteTemplateTextarea.value = '';
-            saveSettings({ noteTemplate: '' });
-        }
-    });
-
-    // Export settings
+    // Export / Import
     exportSettingsBtn.addEventListener('click', () => {
-        chrome.storage.sync.get(null, (allSettings) => {
-            const blob = new Blob([JSON.stringify(allSettings, null, 2)], { type: 'application/json' });
+        chrome.storage.sync.get(null, (all) => {
+            const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -196,28 +424,16 @@
         });
     });
 
-    // Import settings
-    importSettingsBtn.addEventListener('click', () => {
-        importFileInput.click();
-    });
-
+    importSettingsBtn.addEventListener('click', () => importFileInput.click());
     importFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = (ev) => {
             try {
-                const imported = JSON.parse(event.target.result);
+                const imported = JSON.parse(ev.target.result);
                 chrome.storage.sync.set(imported, () => {
-                    loadSettings().then(() => {
-                        defaultFolderInput.value = settings.defaultFolder || 'Places';
-                        defaultTagsInput.value = (settings.defaultTags || []).join(', ');
-                        noteTemplateTextarea.value = settings.noteTemplate || '';
-                        renderVaults();
-                        renderTagsPreview();
-                        showSaveStatus();
-                    });
+                    location.reload();
                 });
             } catch (err) {
                 alert('导入失败: 无效的 JSON 文件');
@@ -227,6 +443,14 @@
         importFileInput.value = '';
     });
 
+    // ==================== Utils ====================
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
     function debounce(fn, delay) {
         let timer;
         return (...args) => {
@@ -235,6 +459,23 @@
         };
     }
 
-    // Init
+    // ==================== Init ====================
+
+    async function init() {
+        await loadSettings();
+        defaultFolderInput.value = settings.defaultFolder || 'Places';
+        defaultTagsInput.value = (settings.defaultTags || []).join(', ');
+
+        // If no templates exist, create defaults
+        if (!settings.templates || settings.templates.length === 0) {
+            settings.templates = DEFAULT_TEMPLATES;
+            saveSettings({ templates: settings.templates });
+        }
+
+        renderVaults();
+        renderTemplateList();
+        showSection('general');
+    }
+
     init();
 })();

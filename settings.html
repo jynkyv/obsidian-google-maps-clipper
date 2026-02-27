@@ -10,127 +10,239 @@
 
 <body class="settings-body">
     <div id="settings">
-        <div id="settings-header">
-            <svg class="logo" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-            </svg>
-            <h1>Obsidian Google Map Clipper</h1>
-            <span class="version">v1.0.0</span>
-        </div>
+        <div id="settings-container">
+            <!-- Sidebar -->
+            <div id="sidebar">
+                <div class="sidebar-header">
+                    <svg class="logo" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span>Map Clipper</span>
+                    <span class="version-tag">v1.0.0</span>
+                </div>
+                <ul>
+                    <li class="sidebar-heading">设置</li>
+                    <li data-section="general" class="active">通用</li>
+                </ul>
+                <ul>
+                    <li class="sidebar-heading">模板</li>
+                </ul>
+                <ul id="template-list"></ul>
+                <button type="button" id="new-template-btn" class="mod-cta sidebar-btn">+ 新建模板</button>
+            </div>
 
-        <!-- General Settings -->
-        <div class="settings-section">
-            <h2>通用设置</h2>
+            <!-- Content -->
+            <div id="content">
+                <!-- General Section -->
+                <div id="general-section" class="settings-section active">
+                    <div class="settings-section-header">
+                        <h2>通用设置</h2>
+                    </div>
 
-            <h3>Vaults</h3>
-            <div class="setting-item">
-                <div class="setting-item-info">
-                    <div class="setting-item-description">
-                        添加你的 Obsidian vault 名称。Vault 名称必须与 Obsidian vault 的名称完全匹配。按 <strong>Enter</strong> 添加。
+                    <div class="settings-form">
+                        <h3>Vaults</h3>
+                        <div class="setting-item">
+                            <div class="setting-item-description">
+                                添加你的 Obsidian vault 名称。名称必须与 Obsidian vault 完全匹配。按 <strong>Enter</strong> 添加。
+                            </div>
+                            <input type="text" id="vault-input" placeholder="输入 vault 名称后按 Enter" autocomplete="off"
+                                spellcheck="false">
+                            <ul id="vault-list"></ul>
+                        </div>
+
+                        <h3>默认设置</h3>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label for="default-vault-select">默认 Vault</label>
+                                <div class="setting-item-description">选择剪藏笔记的默认保存 vault。</div>
+                            </div>
+                            <div class="setting-item-control">
+                                <select id="default-vault-select">
+                                    <option value="">未设置</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label for="default-folder-input">默认文件夹</label>
+                                <div class="setting-item-description">笔记保存的默认文件夹路径。</div>
+                            </div>
+                            <div class="setting-item-control">
+                                <input type="text" id="default-folder-input" placeholder="Places" value="Places">
+                            </div>
+                        </div>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label for="default-tags-input">默认标签</label>
+                                <div class="setting-item-description">每次剪藏时自动添加的标签，逗号分隔。</div>
+                            </div>
+                            <div class="setting-item-control">
+                                <input type="text" id="default-tags-input" placeholder="places, travel" value="places">
+                            </div>
+                        </div>
+
+                        <h3>高级</h3>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label>导出设置</label>
+                                <div class="setting-item-description">导出所有设置和模板为 JSON 文件。</div>
+                            </div>
+                            <div class="setting-item-control">
+                                <button type="button" id="export-settings-btn">导出</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label>导入设置</label>
+                                <div class="setting-item-description">从 JSON 文件导入设置，将覆盖当前配置。</div>
+                            </div>
+                            <div class="setting-item-control">
+                                <button type="button" id="import-settings-btn">导入</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <input type="text" id="vault-input" placeholder="输入 vault 名称后按 Enter" autocomplete="off"
-                    spellcheck="false">
-                <ul id="vault-list"></ul>
-            </div>
 
-            <h3>默认设置</h3>
-
-            <div class="setting-item">
-                <div class="setting-item-info">
-                    <label for="default-vault-select">默认 Vault</label>
-                    <div class="setting-item-description">选择剪藏笔记的默认保存 vault。</div>
-                </div>
-                <select id="default-vault-select"
-                    style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-tertiary);color:var(--text-primary);font-family:var(--font-family);font-size:var(--font-size);">
-                    <option value="">未设置</option>
-                </select>
-            </div>
-
-            <div class="setting-item">
-                <div class="setting-item-info">
-                    <label for="default-folder-input">默认文件夹</label>
-                    <div class="setting-item-description">笔记保存的默认文件夹路径。</div>
-                </div>
-                <input type="text" id="default-folder-input" placeholder="Places" value="Places">
-            </div>
-
-            <div class="setting-item">
-                <div class="setting-item-info">
-                    <label for="default-tags-input">默认标签</label>
-                    <div class="setting-item-description">每次剪藏时自动添加的标签，逗号分隔。</div>
-                </div>
-                <input type="text" id="default-tags-input" placeholder="places, travel" value="places">
-                <div class="tags-container" id="tags-preview"></div>
-            </div>
-        </div>
-
-        <!-- Template Settings -->
-        <div class="settings-section">
-            <h2>笔记模板</h2>
-
-            <div class="setting-item">
-                <div class="setting-item-info">
-                    <label for="note-template-textarea">自定义笔记内容模板</label>
-                    <div class="setting-item-description">
-                        使用变量来自动填充地点数据。可用变量：
-                        <code>{{name}}</code>, <code>{{address}}</code>, <code>{{phone}}</code>,
-                        <code>{{website}}</code>, <code>{{rating}}</code>, <code>{{reviewCount}}</code>,
-                        <code>{{category}}</code>, <code>{{coordinates}}</code>, <code>{{googleMapsUrl}}</code>,
-                        <code>{{hours}}</code>。
-                        <br>留空则使用默认模板。
+                <!-- Template Section (shown when a template is selected) -->
+                <div id="template-section" class="settings-section">
+                    <div class="settings-section-header">
+                        <h2 id="template-section-title">编辑模板</h2>
+                        <div class="settings-section-actions">
+                            <button type="button" id="duplicate-template-btn" class="btn-icon" title="复制模板">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                                </svg>
+                            </button>
+                            <button type="button" id="delete-template-btn" class="btn-icon btn-danger" title="删除模板">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <textarea id="note-template-textarea" rows="10" placeholder="## {{name}}
+
+                    <div class="settings-form">
+                        <div class="setting-item">
+                            <label for="template-name">模板名称</label>
+                            <input type="text" id="template-name" placeholder="如: 餐厅、景点、咖啡店...">
+                        </div>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label for="template-icon">图标</label>
+                                <div class="setting-item-description">Obsidian 笔记的图标名称（如 map-pin, utensils, coffee）
+                                </div>
+                            </div>
+                            <div class="setting-item-control">
+                                <input type="text" id="template-icon" placeholder="map-pin" style="width: 140px;">
+                            </div>
+                        </div>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label for="template-color">颜色</label>
+                                <div class="setting-item-description">Obsidian 笔记的强调色</div>
+                            </div>
+                            <div class="setting-item-control">
+                                <div class="color-picker-group">
+                                    <input type="color" id="template-color-picker" value="#8b5cf6">
+                                    <input type="text" id="template-color" placeholder="#8b5cf6" style="width: 100px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label for="template-folder">文件夹</label>
+                                <div class="setting-item-description">此模板的笔记保存路径，覆盖默认设置。</div>
+                            </div>
+                            <div class="setting-item-control">
+                                <input type="text" id="template-folder" placeholder="Places" style="width: 200px;">
+                            </div>
+                        </div>
+
+                        <div class="setting-item mod-horizontal">
+                            <div class="setting-item-info">
+                                <label for="template-tags">标签</label>
+                                <div class="setting-item-description">此模板的默认标签，逗号分隔。</div>
+                            </div>
+                            <div class="setting-item-control">
+                                <input type="text" id="template-tags" placeholder="places, restaurant"
+                                    style="width: 200px;">
+                            </div>
+                        </div>
+
+                        <h3>自定义属性 (Properties)</h3>
+                        <div class="setting-item-description" style="margin-bottom: 12px;">
+                            勾选你希望在此模板中显示的属性字段。被勾选的属性会在 popup 中显示并保存到 frontmatter。
+                        </div>
+
+                        <div class="properties-checklist" id="properties-checklist">
+                            <label class="prop-check"><input type="checkbox" data-prop="name" checked disabled>
+                                <span>name</span> <em>地点名称</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="address" checked>
+                                <span>address</span> <em>地址</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="rating" checked>
+                                <span>rating</span> <em>评分</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="phone" checked>
+                                <span>phone</span> <em>电话</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="website" checked>
+                                <span>website</span> <em>网站</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="coordinates" checked>
+                                <span>coordinates</span> <em>坐标</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="priceRange" checked>
+                                <span>price_range</span> <em>人均消费</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="category"> <span>category</span>
+                                <em>分类</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="hours"> <span>hours</span>
+                                <em>营业时间</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="googleMapsUrl" checked>
+                                <span>google_maps_url</span> <em>链接</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="tags" checked> <span>tags</span>
+                                <em>标签</em></label>
+                            <label class="prop-check"><input type="checkbox" data-prop="created" checked>
+                                <span>created</span> <em>创建日期</em></label>
+                        </div>
+
+                        <h3>自定义属性</h3>
+                        <div class="setting-item-description" style="margin-bottom: 12px;">
+                            添加额外的自定义属性字段。
+                        </div>
+                        <div id="custom-properties-list"></div>
+                        <button type="button" id="add-custom-prop-btn" class="btn-text">+ 添加自定义属性</button>
+
+                        <h3>笔记内容模板</h3>
+                        <div class="setting-item">
+                            <div class="setting-item-description">
+                                自定义笔记正文。可用变量：<code>{{name}}</code>, <code>{{address}}</code>, <code>{{phone}}</code>,
+                                <code>{{website}}</code>, <code>{{rating}}</code>, <code>{{reviewCount}}</code>,
+                                <code>{{category}}</code>, <code>{{coordinates}}</code>, <code>{{googleMapsUrl}}</code>,
+                                <code>{{hours}}</code>, <code>{{priceRange}}</code>。留空则使用默认模板。
+                            </div>
+                            <textarea id="template-content" rows="8" placeholder="## {{name}}
 
 **类型**: {{category}}
 **地址**: {{address}}
-**电话**: {{phone}}
-**网站**: [{{website}}]({{website}})
-**评分**: {{rating}}⭐ ({{reviewCount}} 条评价)
+**评分**: {{rating}}⭐
 
 [📍 Google Maps]({{googleMapsUrl}})"></textarea>
-            </div>
-
-            <div class="setting-item mod-horizontal">
-                <div class="setting-item-info">
-                    <label>重置模板</label>
-                    <div class="setting-item-description">恢复为默认笔记模板。</div>
-                </div>
-                <div class="setting-item-control">
-                    <button type="button" id="reset-template-btn" class="mod-warning">重置</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Advanced Settings -->
-        <div class="settings-section">
-            <h2>高级</h2>
-
-            <div class="setting-item mod-horizontal">
-                <div class="setting-item-info">
-                    <label>导出设置</label>
-                    <div class="setting-item-description">导出所有设置为 JSON 文件。</div>
-                </div>
-                <div class="setting-item-control">
-                    <button type="button" id="export-settings-btn">导出</button>
-                </div>
-            </div>
-
-            <div class="setting-item mod-horizontal">
-                <div class="setting-item-info">
-                    <label>导入设置</label>
-                    <div class="setting-item-description">从 JSON 文件导入设置，将覆盖当前配置。</div>
-                </div>
-                <div class="setting-item-control">
-                    <button type="button" id="import-settings-btn">导入</button>
-                </div>
-            </div>
-        </div>
-
-        <p class="save-status" id="save-status">✓ 设置已保存</p>
     </div>
 
     <input type="file" id="import-file-input" accept=".json" style="display: none;">
