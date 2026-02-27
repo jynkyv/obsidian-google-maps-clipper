@@ -203,6 +203,21 @@
     }
 
     /**
+     * Escape a YAML value — wrap in quotes if it contains special chars
+     */
+    function yamlValue(value) {
+        if (!value) return '""';
+        // If value contains any YAML-special characters, quote it
+        if (/[:\#\[\]\{\}\,\&\*\?\|\-\>\<\=\!\%\@\`\"\'\\]/.test(value) ||
+            value.includes('\n') ||
+            value.trim() !== value) {
+            // Use double quotes and escape internal quotes and backslashes
+            return '"' + value.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+        }
+        return value;
+    }
+
+    /**
      * Build the full markdown content including YAML frontmatter
      */
     function buildFullNote() {
@@ -224,19 +239,32 @@
             if (!value) continue;
             if (key === 'tags') {
                 const tags = value.split(',').map(t => t.trim()).filter(Boolean);
-                frontmatter += `tags:\n`;
-                tags.forEach(tag => {
-                    frontmatter += `  - ${tag}\n`;
-                });
+                if (tags.length > 0) {
+                    frontmatter += 'tags:\n';
+                    tags.forEach(tag => {
+                        frontmatter += '  - ' + tag + '\n';
+                    });
+                }
             } else if (key === 'rating') {
-                frontmatter += `${key}: ${value}\n`;
+                // Rating is numeric, no quoting needed
+                const num = parseFloat(value);
+                frontmatter += key + ': ' + (isNaN(num) ? yamlValue(value) : num) + '\n';
             } else {
-                frontmatter += `${key}: "${value.replace(/"/g, '\\"')}"\n`;
+                frontmatter += key + ': ' + yamlValue(value) + '\n';
             }
         }
         frontmatter += '---\n\n';
 
         return frontmatter + noteContentField.value;
+    }
+
+    /**
+     * Manually encode a parameter for Obsidian URI
+     * We can't use URLSearchParams because it encodes spaces as '+' instead of '%20',
+     * which Obsidian doesn't understand.
+     */
+    function obsidianEncodeParam(str) {
+        return encodeURIComponent(str).replace(/'/g, '%27');
     }
 
     /**
@@ -254,24 +282,29 @@
             filePath = folder + '/' + noteName;
         }
 
-        // Build Obsidian URI
-        const params = new URLSearchParams();
-        if (vault) params.set('vault', vault);
-        params.set('file', filePath);
-        params.set('content', fullNote);
+        // Build Obsidian URI manually to avoid URLSearchParams encoding issues
+        let uri = 'obsidian://new?';
+        const parts = [];
+        if (vault) {
+            parts.push('vault=' + obsidianEncodeParam(vault));
+        }
+        parts.push('file=' + obsidianEncodeParam(filePath));
+        parts.push('content=' + obsidianEncodeParam(fullNote));
+        uri += parts.join('&');
 
-        const uri = `obsidian://new?${params.toString()}`;
+        // Use window.location.href to open custom protocol URI
+        // chrome.tabs.create doesn't work reliably with custom protocols
+        window.location.href = uri;
 
-        // Open the URI
-        chrome.tabs.create({ url: uri }, () => {
-            // Show success
+        // Show success after a short delay
+        setTimeout(() => {
             clipper.style.display = 'none';
             successMessage.style.display = 'flex';
 
             setTimeout(() => {
                 window.close();
             }, 1500);
-        });
+        }, 500);
     }
 
     /**
