@@ -134,7 +134,7 @@
                 vaults: [],
                 defaultVault: '',
                 defaultFolder: 'Resources/Places',
-                defaultTags: ['places'],
+                defaultTags: [],
                 noteTemplate: '',
                 templates: [],
                 activeTemplateId: 'default'

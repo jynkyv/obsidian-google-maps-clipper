@@ -8,7 +8,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'map-pin',
         color: '#8b5cf6',
         folder: 'Resources/Places',
-        tags: 'places',
+        tags: '',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'coordinates', 'priceRange', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -19,7 +19,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'utensils',
         color: '#f59e0b',
         folder: 'Resources/Places',
-        tags: 'places, places/restaurant',
+        tags: 'places/restaurant',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -30,7 +30,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'coffee',
         color: '#78716c',
         folder: 'Resources/Places',
-        tags: 'places, places/cafe',
+        tags: 'places/cafe',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -41,7 +41,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'landmark',
         color: '#3b82f6',
         folder: 'Resources/Places',
-        tags: 'places, places/attraction',
+        tags: 'places/attraction',
         properties: ['name', 'address', 'rating', 'category', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -52,7 +52,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'bed',
         color: '#ec4899',
         folder: 'Resources/Places',
-        tags: 'places, places/hotel',
+        tags: 'places/hotel',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -63,7 +63,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'wine',
         color: '#a855f7',
         folder: 'Resources/Places',
-        tags: 'places, places/bar',
+        tags: 'places/bar',
         properties: ['name', 'address', 'rating', 'phone', 'priceRange', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -74,7 +74,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'shopping-bag',
         color: '#14b8a6',
         folder: 'Resources/Places',
-        tags: 'places, places/shopping',
+        tags: 'places/shopping',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -85,7 +85,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'trees',
         color: '#22c55e',
         folder: 'Resources/Places',
-        tags: 'places, places/park',
+        tags: 'places/park',
         properties: ['name', 'address', 'rating', 'category', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -96,7 +96,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'palette',
         color: '#f97316',
         folder: 'Resources/Places',
-        tags: 'places, places/museum',
+        tags: 'places/museum',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -107,7 +107,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'dumbbell',
         color: '#ef4444',
         folder: 'Resources/Places',
-        tags: 'places, places/sports',
+        tags: 'places/sports',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -118,7 +118,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'heart-pulse',
         color: '#dc2626',
         folder: 'Resources/Places',
-        tags: 'places, places/medical',
+        tags: 'places/medical',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'hours', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
@@ -129,7 +129,7 @@ const DEFAULT_TEMPLATES = [
         icon: 'bookmark',
         color: '#eab308',
         folder: 'Resources/Places',
-        tags: 'places, places/wanted',
+        tags: 'places/wanted',
         properties: ['name', 'address', 'rating', 'category', 'priceRange', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''

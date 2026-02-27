@@ -49,7 +49,7 @@
                 vaults: [],
                 defaultVault: '',
                 defaultFolder: 'Resources/Places',
-                defaultTags: ['places'],
+                defaultTags: [],
                 templates: DEFAULT_TEMPLATES,
                 activeTemplateId: 'default'
             }, (result) => {

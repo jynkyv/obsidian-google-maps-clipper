@@ -57,7 +57,7 @@ chrome.runtime.onInstalled.addListener((details) => {
             vaults: [],
             defaultVault: '',
             defaultFolder: 'Resources/Places',
-            defaultTags: ['places'],
+            defaultTags: [],
             templates: DEFAULT_TEMPLATES,
             activeTemplateId: 'default',
             noteTemplate: '',
