@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obsidian Google Map Clipper — Settings</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="settings-body">
+    <div id="settings">
+        <div id="settings-header">
+            <svg class="logo" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+            </svg>
+            <h1>Obsidian Google Map Clipper</h1>
+            <span class="version">v1.0.0</span>
+        </div>
+
+        <!-- General Settings -->
+        <div class="settings-section">
+            <h2>通用设置</h2>
+
+            <h3>Vaults</h3>
+            <div class="setting-item">
+                <div class="setting-item-info">
+                    <div class="setting-item-description">
+                        添加你的 Obsidian vault 名称。Vault 名称必须与 Obsidian vault 的名称完全匹配。按 <strong>Enter</strong> 添加。
+                    </div>
+                </div>
+                <input type="text" id="vault-input" placeholder="输入 vault 名称后按 Enter" autocomplete="off"
+                    spellcheck="false">
+                <ul id="vault-list"></ul>
+            </div>
+
+            <h3>默认设置</h3>
+
+            <div class="setting-item">
+                <div class="setting-item-info">
+                    <label for="default-vault-select">默认 Vault</label>
+                    <div class="setting-item-description">选择剪藏笔记的默认保存 vault。</div>
+                </div>
+                <select id="default-vault-select"
+                    style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-tertiary);color:var(--text-primary);font-family:var(--font-family);font-size:var(--font-size);">
+                    <option value="">未设置</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-info">
+                    <label for="default-folder-input">默认文件夹</label>
+                    <div class="setting-item-description">笔记保存的默认文件夹路径。</div>
+                </div>
+                <input type="text" id="default-folder-input" placeholder="Places" value="Places">
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-item-info">
+                    <label for="default-tags-input">默认标签</label>
+                    <div class="setting-item-description">每次剪藏时自动添加的标签，逗号分隔。</div>
+                </div>
+                <input type="text" id="default-tags-input" placeholder="places, travel" value="places">
+                <div class="tags-container" id="tags-preview"></div>
+            </div>
+        </div>
+
+        <!-- Template Settings -->
+        <div class="settings-section">
+            <h2>笔记模板</h2>
+
+            <div class="setting-item">
+                <div class="setting-item-info">
+                    <label for="note-template-textarea">自定义笔记内容模板</label>
+                    <div class="setting-item-description">
+                        使用变量来自动填充地点数据。可用变量：
+                        <code>{{name}}</code>, <code>{{address}}</code>, <code>{{phone}}</code>,
+                        <code>{{website}}</code>, <code>{{rating}}</code>, <code>{{reviewCount}}</code>,
+                        <code>{{category}}</code>, <code>{{coordinates}}</code>, <code>{{googleMapsUrl}}</code>,
+                        <code>{{hours}}</code>。
+                        <br>留空则使用默认模板。
+                    </div>
+                </div>
+                <textarea id="note-template-textarea" rows="10" placeholder="## {{name}}
+
+**类型**: {{category}}
+**地址**: {{address}}
+**电话**: {{phone}}
+**网站**: [{{website}}]({{website}})
+**评分**: {{rating}}⭐ ({{reviewCount}} 条评价)
+
+[📍 Google Maps]({{googleMapsUrl}})"></textarea>
+            </div>
+
+            <div class="setting-item mod-horizontal">
+                <div class="setting-item-info">
+                    <label>重置模板</label>
+                    <div class="setting-item-description">恢复为默认笔记模板。</div>
+                </div>
+                <div class="setting-item-control">
+                    <button type="button" id="reset-template-btn" class="mod-warning">重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div class="settings-section">
+            <h2>高级</h2>
+
+            <div class="setting-item mod-horizontal">
+                <div class="setting-item-info">
+                    <label>导出设置</label>
+                    <div class="setting-item-description">导出所有设置为 JSON 文件。</div>
+                </div>
+                <div class="setting-item-control">
+                    <button type="button" id="export-settings-btn">导出</button>
+                </div>
+            </div>
+
+            <div class="setting-item mod-horizontal">
+                <div class="setting-item-info">
+                    <label>导入设置</label>
+                    <div class="setting-item-description">从 JSON 文件导入设置，将覆盖当前配置。</div>
+                </div>
+                <div class="setting-item-control">
+                    <button type="button" id="import-settings-btn">导入</button>
+                </div>
+            </div>
+        </div>
+
+        <p class="save-status" id="save-status">✓ 设置已保存</p>
+    </div>
+
+    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+    <script src="settings.js"></script>
+</body>
+
+</html>

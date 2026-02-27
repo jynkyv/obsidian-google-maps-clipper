@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Obsidian Google Map Clipper</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body id="popup-container">
+  <div id="popup-header">
+    <div class="header-title">
+      <svg class="logo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      <span>Map Clipper</span>
+    </div>
+    <div class="popup-actions">
+      <a href="#" id="open-settings" class="clickable-icon" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <p class="error-message" id="error-message" style="display: none;"></p>
+  <div class="not-maps-message" id="not-maps-message" style="display: none;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+      <circle cx="12" cy="10" r="3"/>
+    </svg>
+    <p>请在 Google Maps 地点页面使用此扩展</p>
+    <span class="hint">打开 Google Maps 并选择一个地点后，点击扩展图标即可剪藏</span>
+  </div>
+
+  <div class="clipper" id="clipper" style="display: none;">
+    <div class="place-preview" id="place-preview" style="display: none;">
+      <img id="preview-photo" src="" alt="Place photo">
+      <div class="place-preview-overlay">
+        <span id="preview-category" class="category-badge"></span>
+      </div>
+    </div>
+
+    <textarea id="note-name-field" rows="1" placeholder="笔记名称"></textarea>
+
+    <div class="metadata-properties-header" id="properties-toggle">
+      <span>Properties</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="chevron">
+        <path d="m6 9 6 6 6-6"/>
+      </svg>
+    </div>
+
+    <div class="metadata-properties" id="metadata-properties">
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
+          <label for="prop-name">name</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-name" type="text" data-field="name">
+        </div>
+      </div>
+
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          </span>
+          <label for="prop-address">address</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-address" type="text" data-field="address">
+        </div>
+      </div>
+
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          <label for="prop-rating">rating</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-rating" type="text" data-field="rating">
+        </div>
+      </div>
+
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </span>
+          <label for="prop-phone">phone</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-phone" type="text" data-field="phone">
+        </div>
+      </div>
+
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </span>
+          <label for="prop-website">website</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-website" type="text" data-field="website">
+        </div>
+      </div>
+
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </span>
+          <label for="prop-coordinates">coordinates</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-coordinates" type="text" data-field="coordinates">
+        </div>
+      </div>
+
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </span>
+          <label for="prop-url">google_maps_url</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-url" type="text" data-field="googleMapsUrl">
+        </div>
+      </div>
+
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3 8 21"/><path d="M14 3l-2 18"/></svg>
+          </span>
+          <label for="prop-tags">tags</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-tags" type="text" data-field="tags" placeholder="tag1, tag2">
+        </div>
+      </div>
+
+      <div class="metadata-property">
+        <div class="metadata-property-key">
+          <span class="metadata-property-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </span>
+          <label for="prop-created">created</label>
+        </div>
+        <div class="metadata-property-value">
+          <input id="prop-created" type="text" data-field="created">
+        </div>
+      </div>
+    </div>
+
+    <div id="note-content-container">
+      <textarea id="note-content-field" rows="5" placeholder="笔记内容..."></textarea>
+    </div>
+
+    <div class="clipper-footer">
+      <div class="vault-path-container">
+        <div id="vault-container" style="display: none;">
+          <select id="vault-select"></select>
+        </div>
+        <input id="path-name-field" type="text" placeholder="文件夹路径" value="Places">
+      </div>
+      <div class="action-buttons">
+        <button id="clip-btn" class="mod-cta">Add to Obsidian</button>
+        <div class="menu-btn">
+          <button id="more-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <div class="menu" id="more-dropdown" style="display: none;">
+            <div class="menu-item" id="copy-clipboard-btn">
+              <div class="menu-item-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              </div>
+              <div class="menu-item-title">复制到剪贴板</div>
+            </div>
+            <div class="menu-item" id="save-file-btn">
+              <div class="menu-item-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>
+              </div>
+              <div class="menu-item-title">保存文件...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <span>正在提取地点数据...</span>
+  </div>
+
+  <div class="success-message" id="success-message" style="display: none;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+    <span>已添加到 Obsidian</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
