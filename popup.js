@@ -109,7 +109,21 @@
                 }
 
                 placeData = response;
-                populateForm(placeData, defaultTags, settings);
+
+                // Auto-detect template from Google Maps category
+                if (placeData.category && typeof matchCategoryToTemplate === 'function') {
+                    const detectedId = matchCategoryToTemplate(placeData.category);
+                    const detectedTemplate = currentTemplates.find(t => t.id === detectedId);
+                    if (detectedTemplate) {
+                        currentTemplate = detectedTemplate;
+                        templateSelect.value = detectedId;
+                        pathNameField.value = currentTemplate.folder || settings.defaultFolder || 'Resources/Places';
+                    }
+                }
+
+                // Reload tags from the (possibly auto-switched) template
+                const finalTags = currentTemplate?.tags ? currentTemplate.tags.split(',').map(t => t.trim()).filter(Boolean) : settings.defaultTags || ['places'];
+                populateForm(placeData, finalTags, settings);
                 clipper.style.display = 'flex';
             });
         } catch (err) {
