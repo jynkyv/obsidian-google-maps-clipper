@@ -5,15 +5,37 @@
   'use strict';
 
   /**
+   * Get the first visible element matching a selector
+   */
+  function getVisible(selector) {
+    const elements = document.querySelectorAll(selector);
+    for (const el of elements) {
+      if (el.offsetParent !== null || window.getComputedStyle(el).display !== 'none') {
+        return el;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get all visible elements matching a selector
+   */
+  function getVisibles(selector) {
+    return Array.from(document.querySelectorAll(selector)).filter(el =>
+      el.offsetParent !== null || window.getComputedStyle(el).display !== 'none'
+    );
+  }
+
+  /**
    * Wait for an element to appear in the DOM
    */
   function waitForElement(selector, timeout = 5000) {
     return new Promise((resolve, reject) => {
-      const el = document.querySelector(selector);
+      const el = getVisible(selector);
       if (el) return resolve(el);
 
       const observer = new MutationObserver((mutations, obs) => {
-        const el = document.querySelector(selector);
+        const el = getVisible(selector);
         if (el) {
           obs.disconnect();
           resolve(el);
@@ -69,17 +91,17 @@
    */
   function extractPhotoUrl() {
     // Try hero image
-    const heroImg = document.querySelector('img.widget-scene-canvas');
+    const heroImg = getVisible('img.widget-scene-canvas');
     if (heroImg && heroImg.src) return heroImg.src;
 
     // Try the main photo button area
-    const photoBtn = document.querySelector('button[jsaction*="photo"] img');
+    const photoBtn = getVisible('button[jsaction*="photo"] img, button[jsaction*="heroHeaderImage"] img');
     if (photoBtn && photoBtn.src) return photoBtn.src;
 
     // Try background images in the header area
-    const headerImages = document.querySelectorAll('[class*="hero"] img, [class*="photo"] img');
+    const headerImages = getVisibles('[class*="hero"] img, [class*="photo"] img, img[decoding="async"]');
     for (const img of headerImages) {
-      if (img.src && !img.src.includes('data:')) return img.src;
+      if (img.src && !img.src.includes('data:') && img.src.includes('googleusercontent.com/')) return img.src;
     }
 
     return '';
@@ -90,7 +112,7 @@
    */
   function extractRating() {
     // Look for rating display - typically a large number like "4.5"
-    const ratingEl = document.querySelector('div.fontDisplayLarge');
+    const ratingEl = getVisible('div.fontDisplayLarge, .F7nice span[aria-hidden="true"]');
     if (ratingEl) {
       const rating = parseFloat(getText(ratingEl));
       if (!isNaN(rating) && rating >= 0 && rating <= 5) {
@@ -99,7 +121,7 @@
     }
 
     // Alternative: look for aria-label with rating
-    const starEls = document.querySelectorAll('[role="img"][aria-label*="star"], [aria-label*="rating"]');
+    const starEls = getVisibles('[role="img"][aria-label*="star"], [role="img"][aria-label*="星"], [aria-label*="rating"]');
     for (const el of starEls) {
       const match = el.getAttribute('aria-label')?.match(/([\d.]+)/);
       if (match) return parseFloat(match[1]);
@@ -113,14 +135,14 @@
    */
   function extractReviewCount() {
     // Look for review count near rating - usually in parentheses like "(1,234)"
-    const reviewEls = document.querySelectorAll('[aria-label*="review"], [aria-label*="評論"], [aria-label*="条评价"]');
+    const reviewEls = getVisibles('[aria-label*="review"], [aria-label*="評論"], [aria-label*="评价"]');
     for (const el of reviewEls) {
       const match = el.getAttribute('aria-label')?.match(/([\d,]+)/);
       if (match) return match[1].replace(/,/g, '');
     }
 
     // Try finding text with parenthesized numbers near the rating
-    const fontBodies = document.querySelectorAll('span[aria-label]');
+    const fontBodies = getVisibles('span[aria-label]');
     for (const el of fontBodies) {
       const label = el.getAttribute('aria-label') || '';
       const match = label.match(/([\d,]+)\s*(review|評論|评价|件)/i);
@@ -142,43 +164,68 @@
     };
 
     // Method 1: Look for buttons with data-item-id
-    const buttons = document.querySelectorAll('button[data-item-id]');
+    const buttons = getVisibles('button[data-item-id]');
     buttons.forEach(btn => {
       const itemId = btn.getAttribute('data-item-id') || '';
+      const ariaLabel = btn.getAttribute('aria-label') || '';
       const text = getText(btn);
 
       if (itemId === 'address' || itemId.startsWith('oloc')) {
-        data.address = text;
+        // Try to get structured text from child, or fallback to aria-label parsing or full text
+        const infoDiv = btn.querySelector('.Io6YTe');
+        if (infoDiv && getText(infoDiv)) {
+          data.address = getText(infoDiv);
+        } else if (ariaLabel.includes(':')) {
+          data.address = ariaLabel.split(':').slice(1).join(':').trim();
+        } else {
+          data.address = text;
+        }
       } else if (itemId.startsWith('phone:') || itemId === 'phone') {
-        data.phone = text;
+        const infoDiv = btn.querySelector('.Io6YTe');
+        if (infoDiv && getText(infoDiv)) {
+          data.phone = getText(infoDiv);
+        } else if (ariaLabel.includes(':')) {
+          data.phone = ariaLabel.split(':').slice(1).join(':').trim();
+        } else {
+          data.phone = text;
+        }
       } else if (itemId === 'authority') {
-        data.website = text;
+        const infoDiv = btn.querySelector('.Io6YTe');
+        data.website = (infoDiv && getText(infoDiv)) ? getText(infoDiv) : text;
       } else if (itemId === 'oloc') {
-        data.plusCode = text;
+        const infoDiv = btn.querySelector('.Io6YTe');
+        data.plusCode = (infoDiv && getText(infoDiv)) ? getText(infoDiv) : text;
       }
     });
 
     // Method 2: Look for links with data-item-id
-    const links = document.querySelectorAll('a[data-item-id]');
+    const links = getVisibles('a[data-item-id]');
     links.forEach(link => {
       const itemId = link.getAttribute('data-item-id') || '';
       if (itemId === 'authority') {
-        data.website = link.getAttribute('href') || getText(link);
+        // Attempt to clean the href if its a google redirect
+        let url = link.getAttribute('href') || getText(link);
+        if (url.includes('google.com/url?q=')) {
+          try { url = new URL(url).searchParams.get('q') || url; } catch (e) { }
+        }
+        data.website = url;
       }
     });
 
     // Method 3: Fallback — look for info rows with icons
     if (!data.address) {
-      const addressBtn = document.querySelector('[data-tooltip="Copy address"], [aria-label*="Address"], [aria-label*="地址"]');
+      const addressBtn = getVisible('[data-tooltip*="address"], [data-tooltip*="地址"], [aria-label*="Address"], [aria-label*="地址"]');
       if (addressBtn) {
-        data.address = getText(addressBtn);
+        const ariaLabel = addressBtn.getAttribute('aria-label') || '';
+        data.address = ariaLabel.includes(':') ? ariaLabel.split(':').slice(1).join(':').trim() : getText(addressBtn);
       }
     }
 
     if (!data.phone) {
-      const phoneBtn = document.querySelector('[data-tooltip="Copy phone number"], [aria-label*="Phone"], [aria-label*="电话"], [aria-label*="電話"]');
+      const phoneBtn = getVisible('[data-tooltip*="phone"], [data-tooltip*="电话"], [aria-label*="Phone"], [aria-label*="电话"], [aria-label*="電話"]');
       if (phoneBtn) {
-        data.phone = getText(phoneBtn);
+        const ariaLabel = phoneBtn.getAttribute('aria-label') || '';
+        data.phone = ariaLabel.includes(':') ? ariaLabel.split(':').slice(1).join(':').trim() : getText(phoneBtn);
       }
     }
 
@@ -190,11 +237,11 @@
    */
   function extractCategory() {
     // Category button is usually right below the name
-    const categoryBtn = document.querySelector('button[jsaction*="category"]');
+    const categoryBtn = getVisible('button[jsaction*="category"]');
     if (categoryBtn) return getText(categoryBtn);
 
     // Try the subtitle / category span
-    const subtitleEl = document.querySelector('[class*="fontBodyMedium"] button, [class*="subtitle"]');
+    const subtitleEl = getVisible('[class*="fontBodyMedium"] button, [class*="subtitle"]');
     if (subtitleEl) {
       const text = getText(subtitleEl);
       if (text && !text.includes('·') && text.length < 50) return text;
@@ -208,7 +255,7 @@
    */
   function extractPriceRange() {
     // Look for the price button with currency icon (jsname="tJHJj" or class containing price info)
-    const priceButtons = document.querySelectorAll('[jsname="tJHJj"], .MNVeJb');
+    const priceButtons = getVisibles('[jsname="tJHJj"], .MNVeJb, .UaQhfb');
     for (const btn of priceButtons) {
       const text = getText(btn);
       // Match patterns like "每人 ¥1,000-2,000", "$10-20", "¥1000〜2000" etc.
@@ -224,7 +271,7 @@
     }
 
     // Fallback: search aria-labels
-    const allBtns = document.querySelectorAll('button[aria-label], div[role="button"][aria-label]');
+    const allBtns = getVisibles('button[aria-label], div[role="button"][aria-label]');
     for (const btn of allBtns) {
       const label = btn.getAttribute('aria-label') || '';
       if (label.includes('¥') || label.includes('$') || label.includes('价') || label.includes('價')) {
@@ -240,13 +287,18 @@
    * Extract opening hours
    */
   function extractHours() {
-    const hoursEl = document.querySelector('[aria-label*="hour"], [aria-label*="营业"], [aria-label*="營業"]');
+    // Look for currently open status block
+    const currentStatus = getVisible('.ZDu9vd, [class*="isOpen"]');
+    if (currentStatus) return getText(currentStatus);
+
+    // Look for aria labels
+    const hoursEl = getVisible('[aria-label*="hour"], [aria-label*="营业"], [aria-label*="營業"], [aria-label*="営業時間"]');
     if (hoursEl) {
       return hoursEl.getAttribute('aria-label') || getText(hoursEl);
     }
 
     // Try the hours table
-    const hoursTable = document.querySelector('table[class*="hour"]');
+    const hoursTable = getVisible('table[class*="hour"]');
     if (hoursTable) {
       return getText(hoursTable);
     }
@@ -259,7 +311,7 @@
    */
   function extractPlaceData() {
     // Place name (h1 or main heading)
-    const nameEl = document.querySelector('h1');
+    const nameEl = getVisible('h1.DUwDvf, h1.fontHeadlineLarge, h1');
     const name = getText(nameEl);
 
     // Rating
@@ -315,7 +367,7 @@
     // Place pages typically have /place/ in the URL
     if (url.includes('/place/')) return true;
     // Or have a selected place panel open
-    if (document.querySelector('h1') && document.querySelector('[data-item-id="address"]')) return true;
+    if (getVisible('h1') && (getVisible('[data-item-id="address"]') || getVisible('button[jsaction*="photo"]'))) return true;
     return false;
   }
 
