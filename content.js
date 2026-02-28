@@ -10,7 +10,8 @@
   function getVisible(selector) {
     const elements = document.querySelectorAll(selector);
     for (const el of elements) {
-      if (el.offsetParent !== null || window.getComputedStyle(el).display !== 'none') {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
         return el;
       }
     }
@@ -21,9 +22,10 @@
    * Get all visible elements matching a selector
    */
   function getVisibles(selector) {
-    return Array.from(document.querySelectorAll(selector)).filter(el =>
-      el.offsetParent !== null || window.getComputedStyle(el).display !== 'none'
-    );
+    return Array.from(document.querySelectorAll(selector)).filter(el => {
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
   }
 
   /**
