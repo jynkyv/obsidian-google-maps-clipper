@@ -6,13 +6,18 @@
 
   /**
    * Get the first visible element matching a selector
+   * Splits comma-separated selectors to respect defined priority instead of DOM order
    */
-  function getVisible(selector) {
-    const elements = document.querySelectorAll(selector);
-    for (const el of elements) {
-      const rect = el.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        return el;
+  function getVisible(selectorStr) {
+    const selectors = selectorStr.split(',').map(s => s.trim());
+    for (const selector of selectors) {
+      if (!selector) continue;
+      const elements = document.querySelectorAll(selector);
+      for (const el of elements) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          return el;
+        }
       }
     }
     return null;
@@ -20,12 +25,26 @@
 
   /**
    * Get all visible elements matching a selector
+   * Splits comma-separated selectors to respect defined priority instead of DOM order
    */
-  function getVisibles(selector) {
-    return Array.from(document.querySelectorAll(selector)).filter(el => {
-      const rect = el.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    });
+  function getVisibles(selectorStr) {
+    const selectors = selectorStr.split(',').map(s => s.trim());
+    const results = [];
+    const seen = new Set();
+
+    for (const selector of selectors) {
+      if (!selector) continue;
+      const elements = document.querySelectorAll(selector);
+      for (const el of elements) {
+        if (seen.has(el)) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          results.push(el);
+          seen.add(el);
+        }
+      }
+    }
+    return results;
   }
 
   /**
