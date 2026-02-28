@@ -152,6 +152,15 @@ const CATEGORY_RULES = [
             'beach', 'forest', 'lake', 'mountain', 'trail', 'hiking trail',
             '公園', '国立公園', '庭園', '自然公園', 'ビーチ', '森'
         ]
+    },
+    // ── 8. 电影场景 → film_location ──
+    {
+        templateId: 'film_location',
+        categories: [
+            '电影制片厂', '影视基地', '电影拍摄地', '影视城',
+            'film studio', 'movie studio', 'film location',
+            '映画スタジオ', '撮影所'
+        ]
     }
 ];
 

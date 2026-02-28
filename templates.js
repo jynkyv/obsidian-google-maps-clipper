@@ -133,6 +133,19 @@ const DEFAULT_TEMPLATES = [
         properties: ['name', 'address', 'rating', 'category', 'priceRange', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
         customProperties: [],
         noteTemplate: ''
+    },
+    {
+        id: 'film_location',
+        name: '电影场景',
+        icon: 'film',
+        color: '#4f46e5',
+        folder: 'Resources/Places',
+        tags: 'places/film_scene',
+        properties: ['name', 'address', 'rating', 'category', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
+        customProperties: [
+            { key: 'movie', defaultValue: '' }
+        ],
+        noteTemplate: ''
     }
 ];
 
