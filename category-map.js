@@ -161,6 +161,15 @@ const CATEGORY_RULES = [
             'film studio', 'movie studio', 'film location',
             '映画スタジオ', '撮影所'
         ]
+    },
+    // ── 9. 拍照打卡 → photo_spot ──
+    {
+        templateId: 'photo_spot',
+        categories: [
+            '观景点', '观景台', '风景名胜', '摄影点', '展望台', '自拍馆', '打卡地',
+            'scenic spot', 'viewpoint', 'observation deck', 'photography studio', 'selfie studio',
+            '絶景スポット', '展望台', '名所', '撮影スポット'
+        ]
     }
 ];
 

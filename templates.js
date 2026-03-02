@@ -146,6 +146,19 @@ const DEFAULT_TEMPLATES = [
             { key: 'movie', defaultValue: '' }
         ],
         noteTemplate: ''
+    },
+    {
+        id: 'photo_spot',
+        name: '出片打卡地',
+        icon: 'camera',
+        color: '#f43f5e',
+        folder: 'Resources/Places',
+        tags: 'places/photo_spot',
+        properties: ['name', 'address', 'rating', 'category', 'coordinates', 'googleMapsUrl', 'tags', 'created'],
+        customProperties: [
+            { key: 'vibe', defaultValue: '' }
+        ],
+        noteTemplate: ''
     }
 ];
 
