@@ -37,9 +37,9 @@ const DEFAULT_TEMPLATES = [
     },
     {
         id: 'attraction',
-        name: '景点',
+        name: '景点、寺庙、游乐场',
         icon: 'landmark',
-        color: '#3b82f6',
+        color: '#ef4444',
         folder: 'Resources/Places',
         tags: 'places/attraction',
         properties: ['name', 'address', 'rating', 'category', 'hours', 'coordinates', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
@@ -48,9 +48,9 @@ const DEFAULT_TEMPLATES = [
     },
     {
         id: 'hotel',
-        name: '酒店 / 民宿',
+        name: '旅馆',
         icon: 'bed',
-        color: '#ec4899',
+        color: '#8b5cf6',
         folder: 'Resources/Places',
         tags: 'places/hotel',
         properties: ['name', 'address', 'rating', 'phone', 'website', 'priceRange', 'coordinates', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
@@ -70,7 +70,7 @@ const DEFAULT_TEMPLATES = [
     },
     {
         id: 'shop',
-        name: '商店 / 购物',
+        name: '购物',
         icon: 'shopping-bag',
         color: '#14b8a6',
         folder: 'Resources/Places',
@@ -81,9 +81,9 @@ const DEFAULT_TEMPLATES = [
     },
     {
         id: 'park',
-        name: '公园 / 户外',
+        name: '公园、河流、湖泊',
         icon: 'trees',
-        color: '#22c55e',
+        color: '#10b981',
         folder: 'Resources/Places',
         tags: 'places/park',
         properties: ['name', 'address', 'rating', 'category', 'hours', 'coordinates', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
@@ -92,7 +92,7 @@ const DEFAULT_TEMPLATES = [
     },
     {
         id: 'museum',
-        name: '博物馆 / 展览',
+        name: '美术馆、博物馆',
         icon: 'palette',
         color: '#f97316',
         folder: 'Resources/Places',
@@ -149,15 +149,59 @@ const DEFAULT_TEMPLATES = [
     },
     {
         id: 'photo_spot',
-        name: '出片打卡地',
+        name: '观景台',
         icon: 'camera',
-        color: '#f43f5e',
+        color: '#f97316',
         folder: 'Resources/Places',
         tags: 'places/photo_spot',
         properties: ['name', 'address', 'rating', 'category', 'coordinates', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
         customProperties: [
             { key: 'vibe', defaultValue: '' }
         ],
+        noteTemplate: ''
+    },
+    {
+        id: 'citywalk',
+        name: '街道、社区、城市漫步',
+        icon: 'footprints',
+        color: '#f472b6',
+        folder: 'Resources/Places',
+        tags: 'places/citywalk',
+        properties: ['name', 'address', 'rating', 'category', 'coordinates', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
+        customProperties: [],
+        noteTemplate: ''
+    },
+    {
+        id: 'shrine',
+        name: '神社',
+        icon: 'torii-gate',
+        color: '#ef4444',
+        folder: 'Resources/Places',
+        tags: 'places/shrine',
+        properties: ['name', 'address', 'rating', 'category', 'coordinates', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
+        customProperties: [],
+        noteTemplate: ''
+    },
+    {
+        id: 'office',
+        name: '办公/银行',
+        icon: 'building',
+        color: '#64748b',
+        folder: 'Resources/Places',
+        tags: 'places/office',
+        properties: ['name', 'address', 'rating', 'category', 'coordinates', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
+        customProperties: [],
+        noteTemplate: ''
+    },
+    {
+        id: 'station',
+        name: '车站',
+        icon: 'train',
+        color: '#6366f1',
+        folder: 'Resources/Places',
+        tags: 'places/station',
+        properties: ['name', 'address', 'rating', 'category', 'coordinates', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
+        customProperties: [],
         noteTemplate: ''
     }
 ];

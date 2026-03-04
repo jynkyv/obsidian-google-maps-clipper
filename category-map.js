@@ -12,17 +12,18 @@ const CATEGORY_RULES = [
             // Chinese
             '旅游胜地', '游乐园', '水族馆', '植物园', '保龄球馆', '赌场',
             '电影院', '夜总会', '动物园', '野生动物园', '卡拉OK', '活动场馆',
-            '水上乐园', '网吧', '庆典宴会厅',
+            '水上乐园', '网吧', '庆典宴会厅', '寺庙',
+
             // English
             'tourist attraction', 'amusement park', 'aquarium', 'botanical garden',
             'bowling alley', 'casino', 'movie theater', 'movie theatre',
             'night club', 'nightclub', 'zoo', 'wildlife park', 'karaoke',
             'event venue', 'water park', 'internet cafe', 'banquet hall',
-            'live music venue',
+            'live music venue', 'temple',
             // Japanese
             '観光名所', '遊園地', '水族館', 'ボウリング場', 'カジノ',
             '映画館', 'ナイトクラブ', '動物園', 'カラオケ', 'イベント会場',
-            'ウォーターパーク', 'ネットカフェ'
+            'ウォーターパーク', 'ネットカフェ', '寺院', 'お寺'
         ]
     },
     // ── 2. 文化艺术 → museum ──
@@ -169,6 +170,42 @@ const CATEGORY_RULES = [
             '观景点', '观景台', '风景名胜', '摄影点', '展望台', '自拍馆', '打卡地',
             'scenic spot', 'viewpoint', 'observation deck', 'photography studio', 'selfie studio',
             '絶景スポット', '展望台', '名所', '撮影スポット'
+        ]
+    },
+    // ── 10. 城市漫步 → citywalk ──
+    {
+        templateId: 'citywalk',
+        categories: [
+            '街道', '社区', '街区', '步行街',
+            'street', 'neighborhood', 'pedestrian street',
+            '通り', '商店街', '町', 'コミュニティ'
+        ]
+    },
+    // ── 11. 神社 → shrine ──
+    {
+        templateId: 'shrine',
+        categories: [
+            '神社', '神宫',
+            'shrine', 'jingu',
+            '神社', '神宮'
+        ]
+    },
+    // ── 12. 办公/银行 → office ──
+    {
+        templateId: 'office',
+        categories: [
+            '办公楼', '写字楼', '银行', '公司', '企业',
+            'corporate office', 'company', 'bank', 'office building',
+            'オフィスビル', '銀行', '会社'
+        ]
+    },
+    // ── 13. 交通枢纽 → station ──
+    {
+        templateId: 'station',
+        categories: [
+            '火车站', '地铁站', '公交站', '交通枢纽', '车站',
+            'train station', 'subway station', 'bus stop', 'transit station', 'station',
+            '駅', '地下鉄駅', 'バス停'
         ]
     }
 ];
