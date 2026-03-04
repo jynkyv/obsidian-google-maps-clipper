@@ -170,6 +170,7 @@
         setFieldValue('coordinates', data.coordinates);
         setFieldValue('priceRange', data.priceRange);
         setFieldValue('googleMapsUrl', data.googleMapsUrl);
+        setFieldValue('photoUrl', data.photoUrl);
         setFieldValue('tags', defaultTags.join(', '));
         setFieldValue('created', formatDate(new Date()));
 
@@ -222,6 +223,7 @@
                 .replace(/\{\{category\}\}/g, data.category || '')
                 .replace(/\{\{coordinates\}\}/g, data.coordinates || '')
                 .replace(/\{\{googleMapsUrl\}\}/g, data.googleMapsUrl || '')
+                .replace(/\{\{photoUrl\}\}/g, data.photoUrl || '')
                 .replace(/\{\{hours\}\}/g, data.hours || '')
                 .replace(/\{\{priceRange\}\}/g, data.priceRange || '')
                 .replace(/\{\{#if (\w+)\}\}(.*?)\{\{\/if\}\}/gs, (match, field, content) => {
@@ -231,6 +233,8 @@
 
         // Default template
         let content = `## ${data.name || 'Untitled Place'}\n\n`;
+
+        if (data.photoUrl) content += `![${data.name || '图片'}](${data.photoUrl})\n\n`;
 
         if (data.category) content += `**类型**: ${data.category}\n`;
         if (data.address) content += `**地址**: ${data.address}\n`;
@@ -280,6 +284,7 @@
             coordinates: getFieldValue('coordinates'),
             price_range: getFieldValue('priceRange'),
             google_maps_url: getFieldValue('googleMapsUrl'),
+            photo_url: getFieldValue('photoUrl'),
             tags: getFieldValue('tags'),
             created: getFieldValue('created')
         };
