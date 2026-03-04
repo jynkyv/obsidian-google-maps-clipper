@@ -213,7 +213,7 @@
 
     function generateNoteContent(data, template) {
         if (template) {
-            return template
+            let processed = template
                 .replace(/\{\{name\}\}/g, data.name || '')
                 .replace(/\{\{address\}\}/g, data.address || '')
                 .replace(/\{\{phone\}\}/g, data.phone || '')
@@ -229,6 +229,13 @@
                 .replace(/\{\{#if (\w+)\}\}(.*?)\{\{\/if\}\}/gs, (match, field, content) => {
                     return data[field] ? content : '';
                 });
+
+            // If the template didn't use {{photoUrl}} but we have a photo, prepend it
+            if (data.photoUrl && !template.includes('{{photoUrl}}')) {
+                processed = `![${data.name || '图片'}](${data.photoUrl})\n\n` + processed;
+            }
+
+            return processed;
         }
 
         // Default template
