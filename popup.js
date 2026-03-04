@@ -327,7 +327,10 @@
      * Send note to Obsidian via URI protocol
      */
     function sendToObsidian() {
-        const noteName = noteNameField.value || 'Untitled Place';
+        let noteName = noteNameField.value || 'Untitled Place';
+        // Sanitize note name to avoid creating unintended folders or breaking Obsidian (e.g. replacing /, \, :, etc.)
+        noteName = noteName.replace(/[\\/:"*?<>|]/g, '-').trim();
+
         const fullNote = buildFullNote();
         const vault = vaultSelect?.value || '';
         const folder = pathNameField.value || '';
