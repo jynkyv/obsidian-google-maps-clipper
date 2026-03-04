@@ -111,18 +111,34 @@
    * Extract the place photo URL from the hero image
    */
   function extractPhotoUrl() {
-    // Try hero image
+    // 1. Try modern hero image class
     const heroImg = getVisible('img.widget-scene-canvas');
     if (heroImg && heroImg.src) return heroImg.src;
 
-    // Try the main photo button area
+    // 2. Try the main photo button area
     const photoBtn = getVisible('button[jsaction*="photo"] img, button[jsaction*="heroHeaderImage"] img');
     if (photoBtn && photoBtn.src) return photoBtn.src;
 
-    // Try background images in the header area
+    // 3. Try background images in the header area, avoiding data URIs
     const headerImages = getVisibles('[class*="hero"] img, [class*="photo"] img, img[decoding="async"]');
     for (const img of headerImages) {
       if (img.src && !img.src.includes('data:') && img.src.includes('googleusercontent.com/')) return img.src;
+    }
+
+    // 4. Try the meta property for og:image from the document head
+    const ogImage = document.querySelector('meta[property="og:image"]');
+    if (ogImage && ogImage.content && ogImage.content.includes('googleusercontent')) return ogImage.content;
+
+    // 5. Try any image that looks like a Google Maps photo URL inside the main pane
+    const allImages = getVisibles('img');
+    for (const img of allImages) {
+      if (img.src && typeof img.src === 'string') {
+        // Look for Google user content URLs that are likely photos (not avatars or tiny icons)
+        // Usually contains /p/ (for photos) and ends with dimensions like =s680-w680-h510
+        if (img.src.includes('googleusercontent.com/p/')) {
+          return img.src;
+        }
+      }
     }
 
     return '';
