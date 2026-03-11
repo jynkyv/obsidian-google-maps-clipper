@@ -207,7 +207,7 @@
       const ariaLabel = btn.getAttribute('aria-label') || '';
       const text = getText(btn);
 
-      if (itemId === 'address' || itemId.startsWith('oloc')) {
+      if (itemId === 'address') {
         // Try to get structured text from child, or fallback to aria-label parsing or full text
         const infoDiv = btn.querySelector('.Io6YTe');
         if (infoDiv && getText(infoDiv)) {
@@ -216,6 +216,13 @@
           data.address = ariaLabel.split(':').slice(1).join(':').trim();
         } else {
           data.address = text;
+        }
+      } else if (itemId.startsWith('oloc')) {
+        const infoDiv = btn.querySelector('.Io6YTe');
+        const codeText = (infoDiv && getText(infoDiv)) ? getText(infoDiv) : (ariaLabel.includes(':') ? ariaLabel.split(':').slice(1).join(':').trim() : text);
+        data.plusCode = codeText;
+        if (!data.address) {
+          data.address = codeText;
         }
       } else if (itemId.startsWith('phone:') || itemId === 'phone') {
         const infoDiv = btn.querySelector('.Io6YTe');
@@ -229,9 +236,6 @@
       } else if (itemId === 'authority') {
         const infoDiv = btn.querySelector('.Io6YTe');
         data.website = (infoDiv && getText(infoDiv)) ? getText(infoDiv) : text;
-      } else if (itemId === 'oloc') {
-        const infoDiv = btn.querySelector('.Io6YTe');
-        data.plusCode = (infoDiv && getText(infoDiv)) ? getText(infoDiv) : text;
       }
     });
 
@@ -411,12 +415,28 @@
   // Listen for messages from popup
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractPlaceData') {
-      // Give the page a moment to fully render dynamic content
-      setTimeout(() => {
+
+      const maxRetries = 10;
+      const retryDelay = 200;
+      let attempt = 0;
+
+      const tryExtract = () => {
+        attempt++;
         const data = extractPlaceData();
         data.isPlacePage = isPlacePage();
-        sendResponse(data);
-      }, 300);
+
+        // If we found a name or an address, or we've hit the max retries
+        if ((data.name && Object.keys(data).some(k => k !== 'name' && k !== 'extractedAt' && k !== 'isPlacePage' && k !== 'url' && data[k])) || attempt >= maxRetries) {
+          sendResponse(data);
+        } else {
+          // Otherwise wait and try again
+          setTimeout(tryExtract, retryDelay);
+        }
+      };
+
+      // Start extraction attempt
+      setTimeout(tryExtract, 300);
+
       return true; // Keep the message channel open for async response
     }
 

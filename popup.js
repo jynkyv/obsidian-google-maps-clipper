@@ -156,6 +156,70 @@
         });
     }
 
+    /**
+     * Extract country and city from address for hierarchical tags
+     * Expects addresses like "4 Chome-1-396 Kotonoocho, Chuo Ward, Kobe, Hyogo 651-0094日本"
+     */
+    function extractAddressComponents(address) {
+        if (!address) return { country: '', city: '' };
+
+        const components = { country: '', city: '' };
+        const lowerAddress = address.toLowerCase();
+
+        // Country detection rules
+        const countryRules = [
+            { key: 'japan', matches: ['日本', 'japan'] },
+            { key: 'china', matches: ['中国', 'china'] },
+            { key: 'taiwan', matches: ['台湾', '台灣', 'taiwan'] },
+            { key: 'usa', matches: ['usa', 'united states', '美国', '美國'] },
+            { key: 'uk', matches: ['united kingdom', '英国', '英國'] }
+        ];
+
+        for (const rule of countryRules) {
+            if (rule.matches.some(m => lowerAddress.includes(m.toLowerCase()))) {
+                components.country = rule.key;
+                break;
+            }
+        }
+
+        // City detection rules (these also help identify country)
+        const cityRules = [
+            // Japan
+            { country: 'japan', key: 'tokyo', matches: ['tokyo', '東京', '東京都', '东京', '东京都'] },
+            { country: 'japan', key: 'osaka', matches: ['osaka', '大阪', '大阪府'] },
+            { country: 'japan', key: 'kyoto', matches: ['kyoto', '京都', '京都府'] },
+            { country: 'japan', key: 'kobe', matches: ['kobe', '神户', '神戸'] },
+            { country: 'japan', key: 'yokohama', matches: ['yokohama', '横滨', '横浜'] },
+            { country: 'japan', key: 'nara', matches: ['nara', '奈良'] },
+            { country: 'japan', key: 'sapporo', matches: ['sapporo', '札幌'] },
+            { country: 'japan', key: 'fukuoka', matches: ['fukuoka', '福冈', '福岡'] },
+            { country: 'japan', key: 'nagoya', matches: ['nagoya', '名古屋'] },
+            { country: 'japan', key: 'kamakura', matches: ['kamakura', '镰仓', '鎌倉'] },
+            { country: 'japan', key: 'hakone', matches: ['hakone', '箱根'] },
+            // China
+            { country: 'china', key: 'shanghai', matches: ['shanghai', '上海', '上海市'] },
+            { country: 'china', key: 'beijing', matches: ['beijing', '北京', '北京市'] },
+            { country: 'china', key: 'hongkong', matches: ['hong kong', '香港'] },
+            { country: 'china', key: 'macau', matches: ['macau', '澳门', '澳門'] },
+            { country: 'china', key: 'guangzhou', matches: ['guangzhou', '广州'] },
+            { country: 'china', key: 'shenzhen', matches: ['shenzhen', '深圳'] },
+            { country: 'china', key: 'hangzhou', matches: ['hangzhou', '杭州'] },
+            { country: 'china', key: 'chengdu', matches: ['chengdu', '成都'] },
+            { country: 'china', key: 'nanjing', matches: ['nanjing', '南京'] },
+            { country: 'china', key: 'suzhou', matches: ['suzhou', '苏州'] }
+        ];
+
+        for (const rule of cityRules) {
+            if (rule.matches.some(m => lowerAddress.includes(m.toLowerCase()))) {
+                components.city = rule.key;
+                components.country = rule.country; // City match overrides country detection
+                break;
+            }
+        }
+
+        return components;
+    }
+
     function populateForm(data, defaultTags, settings) {
         // Note name
         noteNameField.value = data.name || '';
@@ -171,8 +235,8 @@
         setFieldValue('priceRange', data.priceRange);
         setFieldValue('googleMapsUrl', data.googleMapsUrl);
         setFieldValue('photoUrl', data.photoUrl);
-        setFieldValue('tags', defaultTags.join(', '));
-        setFieldValue('created', formatDate(new Date()));
+        setFieldValue('tags', generateHierarchicalTags(data.address, defaultTags));
+        setFieldValue('date', formatDate(new Date()));
 
         // Set icon and color from template
         if (currentTemplate) {
@@ -195,6 +259,26 @@
         // Generate note content
         noteContentField.value = generateNoteContent(data, settings.noteTemplate);
         autoResizeTextarea(noteContentField);
+    }
+
+    function generateHierarchicalTags(address, defaultTags) {
+        const { country, city } = extractAddressComponents(address);
+        let tags = [...defaultTags];
+
+        if (country) {
+            const base = 'life/travel';
+            if (city) {
+                const cityTag = `${base}/${country}/${city}`;
+                // 移除不标准的简短标签 (如 shanghai)
+                tags = tags.filter(t => t !== city || t === cityTag);
+                if (!tags.includes(cityTag)) tags.push(cityTag);
+            } else {
+                const countryTag = `${base}/${country}`;
+                if (!tags.includes(countryTag)) tags.push(countryTag);
+            }
+        }
+
+        return tags.join(', ');
     }
 
     function setFieldValue(field, value) {
@@ -293,7 +377,7 @@
             google_maps_url: getFieldValue('googleMapsUrl'),
             photo_url: getFieldValue('photoUrl'),
             tags: getFieldValue('tags'),
-            created: getFieldValue('created')
+            date: getFieldValue('date')
         };
 
         // Build YAML frontmatter
@@ -461,8 +545,16 @@
             // Update folder
             pathNameField.value = currentTemplate.folder || '';
             // Update tags
-            const tags = currentTemplate.tags ? currentTemplate.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-            setFieldValue('tags', tags.join(', '));
+            let newTagsList = currentTemplate.tags ? currentTemplate.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+            let newTagsString = '';
+
+            if (placeData && placeData.address) {
+                // Keep city/country tags intact based on the extracted address
+                newTagsString = generateHierarchicalTags(placeData.address, newTagsList);
+            } else {
+                newTagsString = newTagsList.join(', ');
+            }
+            setFieldValue('tags', newTagsString);
             // Update icon and color
             setFieldValue('icon', currentTemplate.icon || '');
             setFieldValue('color', currentTemplate.color || '');

@@ -228,7 +228,7 @@
             color: '#8b5cf6',
             folder: settings.defaultFolder || 'Resources/Places',
             tags: (settings.defaultTags || []).join(', '),
-            properties: ['name', 'address', 'rating', 'phone', 'website', 'coordinates', 'priceRange', 'googleMapsUrl', 'photoUrl', 'tags', 'created'],
+            properties: ['name', 'address', 'rating', 'phone', 'website', 'coordinates', 'priceRange', 'googleMapsUrl', 'photoUrl', 'tags', 'date'],
             customProperties: [],
             noteTemplate: ''
         };
